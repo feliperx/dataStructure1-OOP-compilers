@@ -1,0 +1,256 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Full
+Input = Stream
+Parser = SLR
+#RegularDefinitions
+L : [a-zA-Z]
+D : [0-9]
+C : [\32-\255]
+Comentario : "\*" [ ^ "*"]* "*\"
+ 
+
+
+#Tokens
+//operadores
+"+"
+"++"
+"-"
+"--"
+"*"  
+"/"
+"("
+")"
+"{"
+"}"
+"=="
+"*="
+"/=" 
+"%="
+"+="
+"-="
+"="
+";"
+"!="
+"<"
+">"
+"<="
+">="
+"%"
+"&&"
+"||"
+"!"
+","
+
+//Tokens
+
+id : {L} ( {L} | {D} | _ )* // id, variavel
+inteiro : {D}+ // tipo inteiro , acaba que quando a gente define um inteiro nï¿½o ï¿½ preciso mais definir um numero jï¿½ que todo numero ï¿½ um inteiro.
+real : {D}+ (.{D}+)* | {D}+ // tipo float aceita digitos simples ou seguindo de ponto flutuante.
+cadeia : \" {C}+ \" // tipo string aceita uma cadeia de caracteres em aspas duplas "Ola mundo".
+char : "'" {C} "'" // sï¿½ aceita apenas um caracter entre as aspas simples 'a'.
+// logico : verdadeiro | falso // acaba que logico ï¿½ uma palavra reservada entï¿½o tem que ver o que vai ser definido no analisador semantico.
+//para criar o tipo byte tem que definir um limite entre -128 e 127
+
+//ignorar espaï¿½o em branco e comentario.
+: [\s\t\n\r]* // tabulaï¿½ï¿½es, quebra de linha e espaï¿½o em branco
+: {Comentario} // comentarios sï¿½o \*  *\
+
+
+//Palavras reservadas que o compilador provavelmente vai ter,qualquer coisa no futuro pode ser retirado ou adicionado.
+IF = id : "se"
+ELSE = id : "senao"
+WHILE = id : "enquanto" 
+WRITE = id : "escreva"
+TRUE = id : "verdadeiro"
+FALSE = id : "falso"
+READ = id : "leia"
+INTEGER = id : "inteiro"
+VOID = id : "vazio"
+BOOLEAN = id : "logico"
+RETURN = id : "retorne"
+FLOAT = id : "real"
+STRING = id : "cadeia"
+CHARACTER = id : "char"
+BYTE = id : "byte"
+MAIN = id: "programa"
+#NonTerminals
+<COPILATION_UNIT>
+
+<PROGRAM_DECLARATION>
+
+<METHOD_DECLARATIONS>
+<METHOD_DECLARATION_LOOP>
+<METHOD_DECLARATION>
+
+<TYPE_SPECIFIER>
+
+<PARAMETER_LIST>
+<MORE_PARAMETER_LIST>
+<PARAMETER>
+
+<STATEMENT_BLOCK>
+<STATEMENT_LOOP>
+<STATEMENT>
+<OTHER_STATEMENT>
+
+<VARIABLE_DECLARATION> 
+<VARIABLE_DECLARATION_LOOP>
+<VARIABLE_INITIALIZER>
+<VARIABLE_LOOP>
+
+<IF_STATEMENT>
+<ELSE_STATEMENT>
+
+<WHILE_STATEMENT>
+
+<WRITE_STATEMENT>
+
+<READ_STATEMENT>
+<IDENTIFIER_LIST>
+
+<RETURN_STATEMENT>
+
+<ASSIGN_STATEMENT>
+<ASSIGN_OPERATION>
+
+
+
+<OR_TERM>
+<OR_TERM_LOOP>
+<AND_TERM>
+<AND_TERM_LOOP>
+<COMPARATION_TERM>
+<COMPARATION_TERM_LOOP>
+<ADD_TERM>
+<ADD_TERM_LOOP>
+<MULT_TERM>
+<MULT_TERM_LOOP>
+
+<FACTOR>
+
+<REFERENCE_TERM>
+<REFERENCE_TERM_LOOP>
+<CASTING_EXPRESSION>
+
+<CALL_STATEMENT>
+<ARGUMENT_LIST>
+<ARGUMENT_LIST_LOOP>
+
+<OR_LEVEL_OPERATION>
+<AND_LEVEL_OPERATION>
+<COMPARATION_LEVEL_OPERATION>
+<ADD_LEVEL_OPERATION>
+<MULT_LEVEL_OPERATION>
+<UNARY_OPERATION>
+<NEGATION_OPERATION>
+
+<LITERAL_EXPRESSION>
+<NUMERIC_LITERAL>
+<BOOLEAN_LITERAL>
+
+<EXPRESSION>
+
+
+
+#Grammar
+<COPILATION_UNIT>::= <PROGRAM_DECLARATION> ;
+<PROGRAM_DECLARATION>::= MAIN id "{" <METHOD_DECLARATIONS> "}";
+
+
+<METHOD_DECLARATIONS>::= <METHOD_DECLARATION_LOOP>;
+<METHOD_DECLARATION_LOOP>::= <METHOD_DECLARATION> <METHOD_DECLARATION_LOOP> | î;
+<METHOD_DECLARATION>::= <TYPE_SPECIFIER> id "(" <PARAMETER_LIST> ")" <STATEMENT_BLOCK>;
+
+<PARAMETER_LIST>::= <PARAMETER> <MORE_PARAMETER_LIST> | î;
+<MORE_PARAMETER_LIST>::= "," <PARAMETER> <MORE_PARAMETER_LIST> | î;
+<PARAMETER>::= <TYPE_SPECIFIER> id;
+
+
+<TYPE_SPECIFIER>::= BOOLEAN | BYTE | CHARACTER | INTEGER | FLOAT | STRING | VOID;
+
+
+<STATEMENT_BLOCK>::= "{" <STATEMENT_LOOP> "}";
+<STATEMENT_LOOP>::= <STATEMENT> <STATEMENT_LOOP> | î;
+<STATEMENT>::= <STATEMENT_BLOCK> 	
+	|<VARIABLE_DECLARATION> 
+	|<IF_STATEMENT> 
+	|<WHILE_STATEMENT> 
+	|<RETURN_STATEMENT> 
+	|<WRITE_STATEMENT>  
+	|<READ_STATEMENT>
+	|<ASSIGN_STATEMENT>
+	|<CALL_STATEMENT>;
+
+
+// <IF_STATEMENT> ::= IF "(" <EXPRESSION> ")"  <STATEMENT> | <ELSE_STATEMENT>;
+// <ELSE_STATEMENT> ::= <IF_STATEMENT> ELSE <STATEMENT>;
+
+<WHILE_STATEMENT> ::= WHILE "(" <EXPRESSION> ")" <STATEMENT>;
+
+<RETURN_STATEMENT>::= RETURN <EXPRESSION> ";";
+
+<WRITE_STATEMENT>::= WRITE "(" <ARGUMENT_LIST>")" ";";
+<READ_STATEMENT>::= READ "(" <IDENTIFIER_LIST> ")" ";";
+
+<IDENTIFIER_LIST>::= id | id "," <IDENTIFIER_LIST>;
+
+<ASSIGN_STATEMENT>::= id <ASSIGN_OPERATION> <EXPRESSION> ";" | id <UNARY_OPERATION> ";";
+<ASSIGN_OPERATION>::=  "*=" | "/=" | "%=" | "+=" | "-=" | "="; 
+
+<VARIABLE_DECLARATION> ::= <TYPE_SPECIFIER> <VARIABLE_INITIALIZER> <VARIABLE_LOOP> ";";
+<VARIABLE_INITIALIZER>::= id | id "=" <EXPRESSION>;
+<VARIABLE_LOOP>::= "," <VARIABLE_INITIALIZER> <VARIABLE_LOOP> | î;
+
+<EXPRESSION> ::= <OR_TERM>;
+
+<OR_TERM> ::= <AND_TERM> <OR_TERM_LOOP>;
+<OR_TERM_LOOP> ::= <OR_LEVEL_OPERATION> <OR_TERM> | î;
+<AND_TERM>::= <COMPARATION_TERM> <AND_TERM_LOOP>;
+<AND_TERM_LOOP> ::= <AND_LEVEL_OPERATION> <AND_TERM>| î;
+<COMPARATION_TERM> ::= <ADD_TERM> <COMPARATION_TERM_LOOP>;
+<COMPARATION_TERM_LOOP>::= <COMPARATION_LEVEL_OPERATION> <COMPARATION_TERM>| î;
+<ADD_TERM> ::= <MULT_TERM> <ADD_TERM_LOOP>;
+<ADD_TERM_LOOP> ::= <ADD_LEVEL_OPERATION> <ADD_TERM>| î;
+<MULT_TERM>::= <FACTOR> <MULT_TERM_LOOP>;
+<MULT_TERM_LOOP>::= <MULT_LEVEL_OPERATION> <MULT_TERM>| î;
+
+
+<FACTOR>::= <REFERENCE_TERM>
+	|<LITERAL_EXPRESSION>
+	|<CASTING_EXPRESSION>
+	|"(" <EXPRESSION> ")"
+	|<NEGATION_OPERATION> <FACTOR>
+	|<UNARY_OPERATION>;
+
+<REFERENCE_TERM>::= id <REFERENCE_TERM_LOOP>;
+<REFERENCE_TERM_LOOP>::= "(" ")" | "("  <ARGUMENT_LIST> ")" | î ;
+
+<CALL_STATEMENT>::= id "(" ")"| id "(" <ARGUMENT_LIST> ")";
+
+<ARGUMENT_LIST>::= <EXPRESSION> <ARGUMENT_LIST_LOOP>;
+<ARGUMENT_LIST_LOOP>::= "," <ARGUMENT_LIST>| î;
+
+<OR_LEVEL_OPERATION>::= "||";
+<AND_LEVEL_OPERATION>::= "&&";
+<COMPARATION_LEVEL_OPERATION>::= "==" | "!=" | "<" | ">" | ">=" | "<=";
+<ADD_LEVEL_OPERATION>::= "+" | "-";
+<MULT_LEVEL_OPERATION>::= "/" | "*" | "%";
+<UNARY_OPERATION>::= "--" | "++";
+<NEGATION_OPERATION>::= "!";
+
+
+<LITERAL_EXPRESSION>::= <NUMERIC_LITERAL> | <BOOLEAN_LITERAL> | char | cadeia;
+<NUMERIC_LITERAL>::= inteiro | real;
+<BOOLEAN_LITERAL>::= TRUE | FALSE;
+
+<CASTING_EXPRESSION> ::= "("<TYPE_SPECIFIER>")" id;
+
+
+
